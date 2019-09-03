@@ -11785,19 +11785,54 @@ div#notebook {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h4 id="&#20934;&#22791;&#24037;&#20316;">&#20934;&#22791;&#24037;&#20316;<a class="anchor-link" href="#&#20934;&#22791;&#24037;&#20316;">&#182;</a></h4><p>·1)编译工具(CMAKE_GENERATOR)：<br>
-&emsp;&emsp;VS2015,对应的配置信息是MSVC_VERSION=14，装好VS2015后要把cl.exe所在的目录放到环境变量中</p>
+&emsp;&emsp;VS2015,对应的配置信息是MSVC_VERSION=14，装好VS2015后要把cl.exe所在的目录放到环境变量中，其实也就只用到了它而已。</p>
 <p>·2)下载<a href="https://cmake.org/download/">Cmake</a>3.4或者更高的版本<br>
-&emsp;&emsp;并且将Cmake的bin配置到在系统的PATH环境路径中注意装好后在cmd中运行一下cl和cmake，如果不正常，需重启电脑</p>
-<p>·3)安装python解释器(注意仅支持3.5和2.7版本)<br>
-&emsp;&emsp;我的建议是安装anaconda,然后用conda装个2.7或3.5的虚拟环境，这也方便直接用于项目。具体的:当你安装好了anaconda后进cmd执行：conda creat -n py27caffe python=2.7
-，这里我为虚拟环境取名为py27caffe，python的版本为2.7，置于选哪个版本要看你的代码是python几的。激活虚拟环境安装必要的包：numpy,ipykernel(以便jupyter使用),protobuf(如何安装看4)</p>
+&emsp;&emsp;将Cmake的bin配置到在系统的PATH环境路径中注意装好后在cmd中运行一下cl和cmake，如果不正常，需重启电脑。Cmake需要CMAKE_GENERATOR，win版caffe只有两种生成器可选：VS和Ninja，我们选的是VS，所以后面改配置时需要将Ninja置为0，它默认的是1。</p>
+<p>·3)安装python解释器以提供python调用接口(注意仅支持3.5和2.7版本)<br>
+&emsp;&emsp;我的建议是安装anaconda,然后用conda装个2.7或3.5的虚拟环境，这也方便直接用于项目。具体的:当你安装好了anaconda后进cmd执行：conda creat -n py27caffe python=2.7，这里我为虚拟环境取名为py27caffe，python的版本为2.7，置于选哪个版本要看你的代码是python几的。激活虚拟环境安装必要的包：numpy,ipykernel(以便jupyter使用),protobuf(如何安装看4)</p>
 <p>·4)安装protobuf<br>
 &emsp;&emsp;这个包是python导入caffe需要的依赖包，具体的如果是python3的话直接pip install protobuf即可，如果是python2就稍微麻烦一些。具体的：<br>
 先下载包文件：<a href="https://github.com/protocolbuffers/protobuf/releases/tag/v3.9.1">protobuf</a>下载红圈的两个文件<br>
 <img src="attachment:%E5%9B%BE%E7%89%87.png" alt="%E5%9B%BE%E7%89%87.png"><br>
 &emsp;&emsp;下载好后将win64文件夹中bin文件夹下的protoc.exe程序拷贝到protobuf-python-3.9.1\protobuf-3.9.1\src文件夹下，然后切换工作路径为protobuf-python-3.9.1\protobuf-3.9.1\python，然后激活py27caffe(为了把它装进这个指定的虚拟环境)，按序执行命令：python setup.py build，python setup.py install。如果import caffe时还报没有google.xx.xxx模块的话可以重启电脑后，再导一次。</p>
 <p>·5)安装cuda:<br>
-&emsp;&emsp;cuda的版本与VS的版本一定要对应。VS2015用的cuda版本是8.X，这里只用CPU故略过cuda安装。</p>
+&emsp;&emsp;安装win版caffe对工具的版本有如下要求，只能选其一：</p>
+<table>
+<thead><tr>
+<th>VS版本</th>
+<th>CPU/GPU</th>
+<th>python版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VS2015</td>
+<td>CPU only</td>
+<td>python3.5</td>
+</tr>
+<tr>
+<td>VS2015</td>
+<td>CPU only</td>
+<td>python2.7</td>
+</tr>
+<tr>
+<td>VS2013</td>
+<td>CPU only</td>
+<td>python2.7</td>
+</tr>
+<tr>
+<td>VS2015</td>
+<td>CUDA 8.0(GPU )</td>
+<td>python3.5</td>
+</tr>
+<tr>
+<td>VS2015</td>
+<td>CUDA 8.0(GPU )</td>
+<td>python2.7</td>
+</tr>
+</tbody>
+</table>
+<p>&emsp;&emsp;我这里只装CPU版，故略过装CUDA步，如需安装GPU版需要安装CUDA8.0(如果用的是VS2015编译的话)，具体教程可以参考：<a href="http://www.tutorialspoint.com/cuda/cuda_installation.htm">CUDA installation</a></p>
 
 </div>
 </div>
@@ -11809,13 +11844,13 @@ div#notebook {
 <h4 id="&#27493;&#39588;">&#27493;&#39588;<a class="anchor-link" href="#&#27493;&#39588;">&#182;</a></h4><p>step1:下载caffe源码<br>
 &emsp;&emsp;新建一个文件夹，然后将<a href="https://github.com/BVLC/caffe/tree/windows">win版源码</a>下载到该文件夹下重命名为caffe-windows，如果电脑上有git的话直接cd进新建文件中并执行：git clone -b windows <a href="https://github.com/BVLC/caffe.git">https://github.com/BVLC/caffe.git</a> caffe-windows</p>
 <p>step2:更改源码编译配置文件<br>
-&emsp;&emsp;记事本打开..caffe-windows\scripts\build_win.cmd，按下图更改：
+&emsp;&emsp;记事本打开..caffe-windows\scripts\build_win.cmd，改成如下所示：
 <img src="attachment:%E5%9B%BE%E7%89%87.png" alt="%E5%9B%BE%E7%89%87.png">
 改动的地方有：<br>
-1）WITH_NINJA=1，将1改为0，表示不用NINJA来编译源码。用的编译器是VS，对应的版本是MSVC_VERSION=14即vs2015版<br>
-2）CPU_ONLY=0，将0改为1，表示用CPU版<br>
-3）PYTHON_VERSION=2，2表示用python2解释，3表示用python3解释，注意只支持python2.7和python3.5，这里我用的是python2.7故不改动<br>
-4）BUILD_PYTHON=1，这里默认是1，表示建立python语言的接口，这里不改</p>
+1）WITH_NINJA=1，将1改为0，表示不用cmake的生成器不用NINJA相应的就只能用VS了。VS2015对应的版本配置是MSVC_VERSION=14，改成12就表示用VS2013，注意看注释信息就清楚了。<br>
+2）CPU_ONLY=0，将0改为1，表示用CPU版 ，那就不用支持CUDA了。<br>
+3）PYTHON_VERSION=2，看注释信息，2表示用python2.7解释，3表示用python3.5解释，注意只支持python2.7和python3.5，这里我用的是python2.7故不改动。<br>
+4）BUILD_PYTHON=1，这里默认是1，表示建立python语言的接口，这里不改。你看它默认的是不建立matlab接口。</p>
 <p>step3:开始编译<br>
 &emsp;&emsp;激活python2的虚拟环境：py27caffe(目的是用py2.7，否则它会去寻找默认python可能会出现版本冲突问题)，然后运行build_win.cmd脚本，开始编译。如果是初次编译那要下载依赖文件，然后才开始编译，要等几分钟...<br>
 &emsp;&emsp;如果是无法连接到服务器或者是下载慢的可以自行百度下载压缩包：python2.7版，百度libraries_v140_x64_py27_1.1.0.tar.bz2下载；python3.5版百度libraries_v140_x64_py35_1.1.0.tar.bz2下载，然后把依赖压缩包放到C:\Users\用户名\.caffe\dependencies\download下(没有相关路径可自行新建)，然后激活环境运行build_win.cmd它会检测到已下载然后就开始自行拆包，然后开始正式编译。注意如果你之前有下载过那么download下会有文件，例如当前download下有py27的文件，但这次我要用py35，那么应当先删除之前download下的文件，否则它检测到download下有文件它就开始拆这个压缩包了，但版本却是不对的。</p>
@@ -11836,9 +11871,10 @@ div#notebook {
  "display_name": "py27caffe",<br>
  "language": "python"<br>
 }<br>
-根据自己的情况改动两个位置：1.解释器位置，即虚拟环境的解释器位置 2.kernel的名字即display_name,随便叫啥都行<br>
+&emsp;&emsp;根据自己的情况改动两个位置：1.解释器位置，即虚拟环境的解释器位置 2.kernel的名字即display_name,随便叫啥都行。以后新建了虚拟环境都可以在kernels下建一个环境名文件夹然后配置一个json文件，改解释器位置和名字即可。有时用方法2将虚拟环境加到jupyter中后，你切换到这个kernel上你会发现它竟然用的是别的环境的解释器，这时你就需要去修改对应的json配置路径(原因可能是使用方法2时没有激活那个环境，它就用的是默认环境)。此外如果你发现在jupyter中切换kernel后它报这个kernel无法使用，那说明它对应的环境没有按照ipykernel包，安装上即可。<br>
 &emsp;&emsp;方法2：<br>
-cmd-&gt;激活虚拟环境-&gt;pip install ipykernel-&gt;python -m ipykernel install --user --name=your kernel name</p>
+cmd-&gt;激活虚拟环境-&gt;pip install ipykernel-&gt;python -m ipykernel install --user --name=your kernel name<br>
+&emsp;&emsp;接下来你只需要用py27caffe这个虚拟环境进行工作就可以了</p>
 
 </div>
 </div>
@@ -11847,8 +11883,10 @@ cmd-&gt;激活虚拟环境-&gt;pip install ipykernel-&gt;python -m ipykernel ins
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><font color=red size=3 face='宋体'>接下来你只需要用py27caffe这个虚拟环境进行工作就可以了</font><br>
-<font color=red size=3 face='宋体'>PS:直接去[win版](https://github.com/BVLC/caffe/tree/windows)github源码的issues下去搜索问题，百度并不能给你一个满意的答案</font></p>
+<p><font color=red size=3 face='宋体'>PS:直接按照win版caffe的READEME文档进行安装,然后有什么问题就去issues板块搜索问题,百度并不能给你一个满意的答案。</font></p>
+<p>参考:<br>
+[1] <a href="https://github.com/BVLC/caffe/blob/windows/README.md">windows caffe README</a><br>
+[2] <a href="https://github.com/yiguanxian/cloud-resource">本文html版、jupyter版</a></p>
 
 </div>
 </div>
